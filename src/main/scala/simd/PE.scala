@@ -6,6 +6,21 @@ import chisel3.util._
 // control signals for the basic processing element, related to the post-processing algorithm
 class PECtrl extends Bundle {
 
+  /** @input
+    *   input_zp_i, input zero point
+    * @input
+    *   output_zp_i, output zero point
+    * @input
+    *   multiplier_i, scaling factor
+    * @input
+    *   shift_i, shift number
+    * @input
+    *   max_int_i, maximum number for clamping
+    * @input
+    *   min_int_i, minimum number for clamping
+    * @input
+    *   double_round_i, if double round
+    */
   val input_zp_i = (SInt(SIMDConstant.constantType.W))
   val output_zp_i = (SInt(SIMDConstant.constantType.W))
   // ! this port has different data width
@@ -57,6 +72,7 @@ class PE extends Module with RequireAsyncReset {
     var2 := (var1 >> 1.U) + io.ctrl_i.output_zp_i
   }
 
+  // clamping
   overflow := var2 > io.ctrl_i.max_int_i
   underflow := var2 < io.ctrl_i.min_int_i
   var3 := Mux(

@@ -65,7 +65,6 @@ trait HasRandomTestGen {
     val input: Int = random.nextInt(math.pow(2, 28).toInt)
     val inputZp: Byte = random.nextInt(256).toByte
     val outputZp: Byte = random.nextInt(256).toByte
-    val realMult: Float = random.nextFloat() / math.pow(2, 31).toFloat * 16
     var shift: Byte = random.nextInt(38).toByte
     if (shift < 0)
       shift = (-shift).toByte
@@ -130,12 +129,14 @@ class PEManualTest
         }
 
         // manually random data test
-        // golden test grab from c spec
+        // test rtl with c-spec from
+        // https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf
         verify(267082502, -59, -118, 8192, 34, 127, -128, true.B, 9)
         verify(71671912, -23, -126, 65536, 37, 127, -128, true.B, -92)
         verify(61791880, -54, 115, 67108864, 47, 127, -128, true.B, 127)
         verify(118289203, 55, 56, 536870912, 50, 127, -128, true.B, 112)
         verify(182938555, -69, -118, 16777216, 45, 127, -128, true.B, -31)
+        verify(182938555, -69, -118, 1566, 65, 127, -128, true, -128)
 
         // test if the golden model matches c spec
         assert(
@@ -158,11 +159,51 @@ class PEManualTest
               127,
               -128,
               doubleRound = true
+            ) &&
+            127 == postProcessingGoldenModel(
+              61791880,
+              -54,
+              115,
+              67108864,
+              47,
+              127,
+              -128,
+              doubleRound = true
+            )
+            && 112 == postProcessingGoldenModel(
+              118289203,
+              55,
+              56,
+              536870912,
+              50,
+              127,
+              -128,
+              doubleRound = true
+            ) &&
+            -31 == postProcessingGoldenModel(
+              182938555,
+              -69,
+              -118,
+              16777216,
+              45,
+              127,
+              -128,
+              doubleRound = true
+            )
+            - 128 == postProcessingGoldenModel(
+              182938555,
+              -69,
+              -118,
+              1566,
+              65,
+              127,
+              -128,
+              doubleRound = true
             )
         )
 
         // batch test
-        val testNum = 10
+        val testNum = 100
         for (i <- 0 until testNum) {
           // gen random test data
           val (
@@ -175,7 +216,7 @@ class PEManualTest
             minInt,
             doubleRound
           ) = RandomTestGen()
-          
+
           // gen golden value
           val goldenValue = postProcessingGoldenModel(
             input,
@@ -187,7 +228,7 @@ class PEManualTest
             minInt,
             doubleRound
           )
-          
+
           // verify the dut result with golden value
           verify(
             input,
