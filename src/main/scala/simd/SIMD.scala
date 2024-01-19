@@ -21,7 +21,7 @@ class SIMDDataIO extends Bundle {
 // post-processing SIMD input and output declaration
 class SIMDIO extends Bundle {
   // the input data across different PEs shares the same control signal
-  val ctrl = Flipped(DecoupledIO(new PECtrl()))
+  val ctrl = Flipped(Decoupled(new PECtrl()))
   // decoupled data ports
   val data = new SIMDDataIO()
 }

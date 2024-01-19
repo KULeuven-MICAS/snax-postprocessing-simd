@@ -13,5 +13,5 @@ object SIMDConstant {
   def constantMulType = 32
 
   // SIMD parallelism
-  def laneLen = 8 * 8
+  def laneLen = 64
 }
