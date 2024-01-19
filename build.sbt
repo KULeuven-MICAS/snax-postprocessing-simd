@@ -1,4 +1,8 @@
 // See README.md for license details.
+//  ---------------------------------------------------------
+//  Copyright 2023 KULeuven
+//  Author: Xiaoling Yi <xiaoling.yi@esat.kuleuven.be>
+//  ---------------------------------------------------------
 
 ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / version := "0.1.0"

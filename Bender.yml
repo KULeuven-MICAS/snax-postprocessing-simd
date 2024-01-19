@@ -1,3 +1,8 @@
+# ---------------------------------------------------------
+# Copyright 2023 KULeuven
+# Author: Xiaoling Yi <xiaoling.yi@esat.kuleuven.be>
+# ---------------------------------------------------------
+
 package:
   name: snax-simd
   authors:
