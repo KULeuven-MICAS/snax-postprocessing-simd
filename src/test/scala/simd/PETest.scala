@@ -136,7 +136,7 @@ class PEManualTest
         verify(61791880, -54, 115, 67108864, 47, 127, -128, true.B, 127)
         verify(118289203, 55, 56, 536870912, 50, 127, -128, true.B, 112)
         verify(182938555, -69, -118, 16777216, 45, 127, -128, true.B, -31)
-        verify(182938555, -69, -118, 1566, 65, 127, -128, true.B, -128)
+        verify(182938555, -69, -128, 1566, 63, 127, -128, true.B, -128)
 
         // test if the golden model matches c spec
         assert(
@@ -189,13 +189,13 @@ class PEManualTest
               127,
               -128,
               doubleRound = true
-            )
-            - 128 == postProcessingGoldenModel(
+            ) &&
+            -128 == postProcessingGoldenModel(
               182938555,
               -69,
-              -118,
+              -128,
               1566,
-              65,
+              63,
               127,
               -128,
               doubleRound = true
