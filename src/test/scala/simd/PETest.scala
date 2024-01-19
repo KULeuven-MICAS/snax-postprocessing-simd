@@ -136,7 +136,7 @@ class PEManualTest
         verify(61791880, -54, 115, 67108864, 47, 127, -128, true.B, 127)
         verify(118289203, 55, 56, 536870912, 50, 127, -128, true.B, 112)
         verify(182938555, -69, -118, 16777216, 45, 127, -128, true.B, -31)
-        verify(182938555, -69, -118, 1566, 65, 127, -128, true, -128)
+        verify(182938555, -69, -118, 1566, 65, 127, -128, true.B, -128)
 
         // test if the golden model matches c spec
         assert(
