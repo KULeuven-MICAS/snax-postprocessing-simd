@@ -81,12 +81,12 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
 
   // if data out is valid from PEs, store the results in case later needs keep sending output data if receiver side is not ready
   when(lane(0).io.valid_o) {
-    out_reg := Cat(result)
+    out_reg := Cat(result.reverse)
   }
 
   // concat every result to a big data bus for output
   // if is keep sending output, send the stored result
-  io.data.out_o.bits := Mux(keep_output, out_reg, Cat(result))
+  io.data.out_o.bits := Mux(keep_output, out_reg, Cat(result.reverse))
 
   // first valid from PE or keep sending valid if receiver side is not ready
   io.data.out_o.valid := lane(0).io.valid_o || keep_output
