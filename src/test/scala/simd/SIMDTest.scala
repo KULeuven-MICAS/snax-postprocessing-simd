@@ -105,13 +105,13 @@ trait HasSIMDTestUtils
   // give input data big bus to dut
   def giveInputData[T <: SIMD](dut: T, input: BigInt) = {
     // giving input data
-    dut.clock.step()
+    dut.clock.step(1)
     dut.io.data.input_i.bits.poke(input)
     dut.io.data.input_i.valid.poke(1.B)
     while (dut.io.data.input_i.ready.peekBoolean() == false) {
       dut.clock.step(1)
     }
-    dut.clock.step()
+    dut.clock.step(1)
 
   }
 
@@ -150,7 +150,7 @@ trait HasSIMDTestUtils
       doubleRound: Bool,
       goldenValue: Array[Byte]
   ) = {
-    dut.clock.step()
+    dut.clock.step(1)
 
     // giving the configuration
     dut.io.ctrl.bits.input_zp_i.poke(input_zp)
@@ -164,7 +164,7 @@ trait HasSIMDTestUtils
     while (dut.io.ctrl.ready.peekBoolean() == false) {
       dut.clock.step(1)
     }
-    dut.clock.step()
+    dut.clock.step(1)
 
     dut.io.ctrl.valid.poke(0)
 
@@ -174,7 +174,7 @@ trait HasSIMDTestUtils
     // get output and check
     checkSIMDOutput(dut, goldenValue)
 
-    dut.clock.step()
+    dut.clock.step(1)
   }
 
 }
@@ -190,7 +190,7 @@ class SIMDAutoTest
         Seq(WriteVcdAnnotation)
       ) { dut =>
         // set test number
-        val testNum = 1
+        val testNum = 100
 
         // random test data generation
         for (i <- 1 to testNum) {
