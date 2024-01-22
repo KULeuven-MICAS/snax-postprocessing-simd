@@ -174,7 +174,7 @@ class SIMDTopAutoTest
         Seq(WriteVcdAnnotation)
       ) { dut =>
         // set test number
-        val testNum = 1
+        val testNum = 100
 
         // random test data generation
         for (i <- 1 to testNum) {
