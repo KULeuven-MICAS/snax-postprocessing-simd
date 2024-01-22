@@ -105,7 +105,7 @@ class PEManualTest
             double_round: Bool,
             golden_output: Byte
         ) = {
-          dut.clock.step()
+          dut.clock.step(1)
 
           // giving input data
           dut.io.input_i.poke(input)
@@ -117,7 +117,7 @@ class PEManualTest
           dut.io.ctrl_i.max_int_i.poke(max_int)
           dut.io.ctrl_i.min_int_i.poke(min_int)
           dut.io.ctrl_i.double_round_i.poke(double_round)
-          dut.clock.step()
+          dut.clock.step(1)
 
           // grab the output data
           val out = dut.io.out_o.peekInt()
@@ -125,7 +125,7 @@ class PEManualTest
           // assert the PE's output data equals to the golden data
           assert(out == golden_output)
 
-          dut.clock.step()
+          dut.clock.step(1)
         }
 
         // manually random data test
