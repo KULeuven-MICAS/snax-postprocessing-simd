@@ -2,18 +2,18 @@
 
 Post-Processing SIMD Accelerator accelerates the post-processing kernel in TinyML workload. The specification of this kernel is defined [here](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
 
-The Post-Processing SIMD Accelerator has a compatible interface with [SNAX core](https://github.com/KULeuven-micas/snitch_cluster) and will be integrated into it. This repository contains the chisel sources and unit tests for the Post-Processing SIMD Accelerator.
-
-The Post-Processing SIMD Accelerator is written in CHISEL 5.0.0 and is intended to be connected to the SNAX accelerator RISC-V manager core through a SystemVerilog wrapper.
+The Post-Processing SIMD Accelerator has a compatible interface with [SNAX core](https://github.com/KULeuven-micas/snitch_cluster) and will be integrated into it. The Post-Processing SIMD Accelerator is written in CHISEL 5.0.0 and is intended to be connected to the SNAX accelerator RISC-V manager core through a SystemVerilog wrapper.
 
 ## Microarchitecture
-The microarchitecture of the Post-Processing SIMD accelerator is shown below. The accelerator datapath consists of parallel PEs. Each PE implements the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for one input data. With parallel PEs, this accelerator can deal with an input vector and output the results in parallel.
-
-The Post-Processing SIMD accelerator datapath has several CSRs. The control data, such as the input and output zero-point and scaling factor, is written in the CSRs via a CsrManager when all the CSR configurations are valid. When doing post-processing computation, the configuration for the next post-processing operation can already be written into the CsrManager. When the current computation finishes, the SNAX core can send the configuration valid signal then the CSR value in the CsrManager will be loaded in to the Post-Processing SIMD datapath.
+The microarchitecture of the Post-Processing SIMD accelerator is shown below.
 
 <p align="center">
   <img src="./docs/microarch.svg" alt="">
 </p>
+
+The accelerator datapath consists of parallel PEs. Each PE implements the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for one input data. With parallel PEs, this accelerator can deal with an input vector and output the results in parallel.
+
+The Post-Processing SIMD accelerator datapath has several CSRs. The control data, such as the input and output zero-point and scaling factor, is written in the CSRs via a CsrManager when all the CSR configurations are valid. When doing post-processing computation, the configuration for the next post-processing operation can already be written into the CsrManager. When the current computation finishes, the SNAX core can send the configuration valid signal then the CSR value in the CsrManager will be loaded in to the Post-Processing SIMD datapath.
 
 ## Parameters
 The parameter for this Post-Processing SIMD Accelerator is the parallelism factor `laneLen` defined in `Parameter.scala`, indicating how many elements can be processed in one cycle. The default value is 64.
@@ -59,14 +59,15 @@ for (ti = 0 to VEC_LEN/Lu – 1):
 *Post-Processing-Func is the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for TinyML workload.
 
 ### CSR definition
+The table below lists the CSRs that the Post-Processing SIMD Accelerator uses. offset in the table is defined by the SNAX core. A more detailed explanation of what are these configurations can be found at `PE.scala` and the [post-processing kernel specification](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
+
 | Address | CSR name             | Notes                               |
 |---------|--------------------------|-------------------------------------|
-| offset* + 0   | CSR_0        | CSR_0[31:24] = max_int, CSR_0[23:16] = shift, CSR_0[15:8] = output_zp CSR_0[7:0] = input_zp            |
+| offset + 0   | CSR_0        | CSR_0[31:24] = max_int, CSR_0[23:16] = shift, CSR_0[15:8] = output_zp CSR_0[7:0] = input_zp            |
 | offset + 1   | CSR_1             | CSR_1[8] = double_round, CSR_1[7:0] = min_int            |
 | offset + 2   | CSR_2             | CSR_2 = multiplier          |
-| offset + 3   | configure valid CSR | any operation (read/write) to this CSR means that the configure is valid           |
+| offset + 3   | configValidCSR | any operation (read/write) to this CSR means that the configure is valid           |
 
-*offset is defined by the SNAX core. A more detailed explanation of what are these configurations can be found at `PE.scala` and the [post-processing kernel specification](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
 
 ## Quick start
 ### Set up Chisel environment
