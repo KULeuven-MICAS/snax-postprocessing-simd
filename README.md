@@ -49,14 +49,13 @@ The  data.input_i.bits are spited into each PE and the results from each PE are 
 </p>
 
 ## Functional description
-The Functional description in the mathematical formula of the Post-Processing SIMD Accelerator is defined as below.
-```
-for (ti = 0 to VEC_LEN/Lu – 1):
-    parfor (si = 0 to Lu -1):
-    Output = Post-Processing-Func*(Input) // Input and Output both have Lu elements.
-```
+The Functional description in the mathematical formula of the Post-Processing SIMD Accelerator is defined as below. The Post-Processing-Func below is the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for TinyML workload. Vu is the spatial unrolling factor which is indicated by `laneLen`.
 
-*Post-Processing-Func is the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for TinyML workload.
+```
+for (ti = 0 to VEC_LEN/Vu – 1):
+    parfor (si = 0 to Vu -1):
+    Output[0..Vu-1] = Post-Processing-Fun*(Input[0..Vu-1]) // Input and Output both have Vu elements.
+```
 
 ### CSR definition
 The table below lists the CSRs that the Post-Processing SIMD Accelerator uses. offset in the table is defined by the SNAX core. A more detailed explanation of what are these configurations can be found at `PE.scala` and the [post-processing kernel specification](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
