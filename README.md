@@ -54,9 +54,9 @@ The Functional description in the mathematical formula of the Post-Processing SI
 ```
 for (ti = 0 to VEC_LEN/Vu – 1):
     parfor (si = 0 to Vu -1):
-    Output[0..Vu-1] = Post-Processing-Fun*(Input[0..Vu-1]) // Input and Output both have Vu elements.
+    Output[0..Vu-1] = Post-Processing-Fun(Input[0..Vu-1]) // Input and Output both have Vu elements.
 ```
-
+git 
 ### CSR definition
 The table below lists the CSRs that the Post-Processing SIMD Accelerator uses. offset in the table is defined by the SNAX core. A more detailed explanation of what are these configurations can be found at `PE.scala` and the [post-processing kernel specification](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
 
