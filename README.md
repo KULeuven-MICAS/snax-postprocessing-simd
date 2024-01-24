@@ -1,6 +1,6 @@
 # Post-Processing SIMD Accelerator for SNAX
 
-Post-Processing SIMD Accelerator accelerates the post-processing kernel in TinyML workload. The specification of this kernel is defined [here](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
+Post-Processing SIMD Accelerator accelerates the post-processing kernel in TinyML workload. The specification of this kernel is defined [here](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).Basically, it combines the common element-wise operations, such as scaling, clamping and quantization kernels.
 
 The Post-Processing SIMD Accelerator has a compatible interface with [SNAX core](https://github.com/KULeuven-micas/snitch_cluster) and will be integrated into it. The Post-Processing SIMD Accelerator is written in CHISEL 5.0.0 and is intended to be connected to the SNAX accelerator RISC-V manager core through a SystemVerilog wrapper.
 
@@ -11,7 +11,7 @@ The microarchitecture of the Post-Processing SIMD accelerator is shown below.
   <img src="./docs/microarch.svg" alt="">
 </p>
 
-The accelerator datapath consists of parallel PEs. Each PE implements the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for one input data. With parallel PEs, this accelerator can deal with an input vector and output the results in parallel.
+The accelerator datapath consists of parallel PEs. Each PE implements the post-processing kernel for one input data. With parallel PEs, this accelerator can deal with an input vector and output the results in parallel.
 
 The Post-Processing SIMD accelerator datapath has several CSRs. The control data, such as the input and output zero-point and scaling factor, is written in the CSRs via a CsrManager when all the CSR configurations are valid. When doing post-processing computation, the configuration for the next post-processing operation can already be written into the CsrManager. When the current computation finishes, the SNAX core can send the configuration valid signal then the CSR value in the CsrManager will be loaded in to the Post-Processing SIMD datapath.
 
@@ -49,14 +49,50 @@ The  data.input_i.bits are spited into each PE and the results from each PE are 
 </p>
 
 ## Functional description
-The Functional description in the mathematical formula of the Post-Processing SIMD Accelerator is defined as below. The Post-Processing-Func below is the [post-processing kernel](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf) for TinyML workload. Vu is the spatial unrolling factor which is indicated by `laneLen`.
+The Functional description in the mathematical formula of the Post-Processing SIMD Accelerator is defined as below. Vu is the spatial unrolling factor which is indicated by `laneLen`.
 
 ```
-for (ti = 0 to VEC_LEN/Vu – 1):
-    parfor (si = 0 to Vu -1):
-    Output[0..Vu-1] = Post-Processing-Fun(Input[0..Vu-1]) // Input and Output both have Vu elements.
+parfor (si = 0 to Vu -1):
+Output[0..Vu-1] = Post-Processing-Fun(Input[0..Vu-1]) // Input and Output both have Vu elements.
 ```
-git 
+The Post-Processing-Func above is the post-processing kernel (see below) for TinyML workload. It combines the operation for scaling, clamping and quantization kernels.
+```
+int8_t scale_quant_clamp_c_spec(int32_t input, int8_t input_zp, int8_t output_zp,
+                         int32_t multiplier,
+                         int8_t shift, // values between 0-63
+                         int8_t max_int, int8_t min_int, bool double_round) {
+
+  // input zero-point adjustment
+  input = input - input_zp;
+
+  // multiplication
+  int64_t var0 = (int64_t)input * (int64_t)multiplier;
+
+  // shift & round
+  int32_t var1 = var0 >> (shift - 1);
+
+  if (double_round) {
+    if (var1 >= 0)
+      var1 += 1;
+    else
+      var1 -= 1;
+  }
+  var1 = var1 >> 1;
+
+  // output zero-point adjustment
+  var1 = var1 + output_zp;
+
+  // clamping
+  if (var1 > max_int)
+    var1 = max_int;
+  if (var1 < min_int)
+    var1 = min_int;
+
+  int8_t result = (int8_t)var1;
+  return result;
+}
+```
+
 ### CSR definition
 The table below lists the CSRs that the Post-Processing SIMD Accelerator uses. offset in the table is defined by the SNAX core. A more detailed explanation of what are these configurations can be found at `PE.scala` and the [post-processing kernel specification](https://gist.github.com/jorendumoulin/83352a1e84501ec4a7b3790461fee2bf).
 
