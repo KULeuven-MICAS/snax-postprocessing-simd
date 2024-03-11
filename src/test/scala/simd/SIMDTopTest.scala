@@ -94,7 +94,7 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
     var csr_2 = "x" + String.format("%08X", multiplier)
 
     // for start address
-    var csr_3 = "x" + String.format("%02X", 0)
+    var csr_3 = "x" + String.format("%02X", 1)
 
     // set configuration
     write_csr(dut, 0, csr_0)
