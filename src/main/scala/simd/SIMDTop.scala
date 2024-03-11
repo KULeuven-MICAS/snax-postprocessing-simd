@@ -56,7 +56,7 @@ class SIMDTop() extends Module with RequireAsyncReset {
 
 }
 
-object SIMDTop extends App {
+object SIMDTop {
   def main(args: Array[String]): Unit = {
     val outPath = args.headOption.getOrElse("generated")
     emitVerilog(
