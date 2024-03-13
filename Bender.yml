@@ -4,6 +4,6 @@
 # ---------------------------------------------------------
 
 package:
-  name: snax-simd
+  name: snax-postprocessing-simd
   authors:
     - Xiaoling Yi <xiaoling.yi@kuleuven.be>
