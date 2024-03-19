@@ -160,6 +160,7 @@ trait HasSIMDTestUtils
     dut.io.ctrl.bits.max_int_i.poke(max_int)
     dut.io.ctrl.bits.min_int_i.poke(min_int)
     dut.io.ctrl.bits.double_round_i.poke(doubleRound)
+    dut.io.ctrl.bits.len.poke(1.U)
     dut.io.ctrl.valid.poke(1.B)
     while (dut.io.ctrl.ready.peekBoolean() == false) {
       dut.clock.step(1)

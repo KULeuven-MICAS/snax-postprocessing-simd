@@ -55,6 +55,7 @@ The Functional description in the mathematical formula of the Post-Processing SI
 parfor (si = 0 to Vu -1):
 Output[0..Vu-1] = Post-Processing-Fun(Input[0..Vu-1]) // Input and Output both have Vu elements.
 ```
+
 The Post-Processing-Func above is the post-processing kernel (see below) for TinyML workload. It combines the operation for scaling, clamping and quantization kernels.
 ```c
 int8_t scale_quant_clamp_c_spec(int32_t input, int8_t input_zp, int8_t output_zp,

@@ -54,6 +54,10 @@ class SIMDTop() extends Module with RequireAsyncReset {
   simd.io.ctrl.bits.double_round_i :=
     SIMDCsrManager.io.csr_config_out.bits(1)(8).asBool
 
+  // length of the data
+  simd.io.ctrl.bits.len :=
+    SIMDCsrManager.io.csr_config_out.bits(3)
+
   io.data <> simd.io.data
 
 }
