@@ -51,13 +51,58 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
   // the receiver isn't ready, needs to send several cycles
   val keep_output = RegInit(0.B)
 
+  val gemm_output_fire = WireInit(0.B)
+
+  val write_counter = RegInit(0.U(32.W))
+
+  // State declaration
+  val sIDLE :: sBUSY :: Nil = Enum(2)
+  val cstate = RegInit(sIDLE)
+  val nstate = WireInit(sIDLE)
+
+  // signals for state transition
+  val config_valid = WireInit(0.B)
+  val computation_finish = WireInit(0.B)
+
+  // Changing states
+  cstate := nstate
+
+  chisel3.dontTouch(cstate)
+  switch(cstate) {
+    is(sIDLE) {
+      when(config_valid) {
+        nstate := sBUSY
+      }.otherwise {
+        nstate := sIDLE
+      }
+
+    }
+    is(sBUSY) {
+      when(computation_finish) {
+        nstate := sIDLE
+      }.otherwise {
+        nstate := sBUSY
+      }
+    }
+  }
+
+  config_valid := io.ctrl.fire
   // when config valid, store the configuration for later computation
-  when(io.ctrl.valid) {
+  when(config_valid) {
     ctrl_csr := io.ctrl.bits
   }
 
+  gemm_output_fire := io.data.out_o.fire
+  when(gemm_output_fire) {
+    write_counter := write_counter + 1.U
+  }.elsewhen(cstate === sIDLE) {
+    write_counter := 0.U
+  }
+
+  computation_finish := (write_counter === ctrl_csr.len - 1.U) && gemm_output_fire && cstate === sBUSY
+
   // always ready for configuration
-  io.ctrl.ready := 1.B
+  io.ctrl.ready := cstate === sIDLE
 
   // give each PE right control signal and data
   // collect the result of each PE
@@ -69,12 +114,12 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
         (i) * SIMDConstant.inputType
       )
       .asSInt
-    lane(i).io.valid_i := io.data.input_i.valid
+    lane(i).io.valid_i := io.data.input_i.valid && io.data.input_i.ready
     result(i) := lane(i).io.out_o
   }
 
   // always valid for new input on less is sending last output
-  io.data.input_i.ready := !keep_output
+  io.data.input_i.ready := !keep_output && !(io.data.out_o.valid & !io.data.out_o.ready) && (cstate === sBUSY)
 
   // if out valid but not ready, keep sneding output valid signal
   keep_output := io.data.out_o.valid & !io.data.out_o.ready
@@ -83,13 +128,14 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
   when(lane(0).io.valid_o) {
     out_reg := Cat(result.reverse)
   }
+  val out_reg_valid = RegNext(lane(0).io.valid_o)
 
   // concat every result to a big data bus for output
   // if is keep sending output, send the stored result
-  io.data.out_o.bits := Mux(keep_output, out_reg, Cat(result.reverse))
+  io.data.out_o.bits := out_reg
 
   // first valid from PE or keep sending valid if receiver side is not ready
-  io.data.out_o.valid := lane(0).io.valid_o || keep_output
+  io.data.out_o.valid := out_reg_valid || keep_output
 
 }
 

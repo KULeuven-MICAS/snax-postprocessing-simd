@@ -30,6 +30,7 @@ class PECtrl extends Bundle {
   val min_int_i = (SInt(SIMDConstant.constantType.W))
   val double_round_i = (Bool())
 
+  val len = (UInt(32.W))
 }
 
 // processing element input and output declaration

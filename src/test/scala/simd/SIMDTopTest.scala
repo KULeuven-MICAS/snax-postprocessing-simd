@@ -94,15 +94,17 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
     var csr_2 = "x" + String.format("%08X", multiplier)
 
     // for start address
-    var csr_3 = "x" + String.format("%02X", 1)
+    var csr_3 = "x" + String.format("%02X", 4)
+    var csr_4 = "x" + String.format("%02X", 1)
 
     // set configuration
     write_csr(dut, 0, csr_0)
     write_csr(dut, 1, csr_1)
     write_csr(dut, 2, csr_2)
+    write_csr(dut, 3, csr_3)
 
     // start signal
-    write_csr(dut, 3, csr_3)
+    write_csr(dut, 4, csr_4)
 
     // read csr and check
     assert(csr_0.U(32.W).litValue == read_csr(dut, 0, "x00").litValue)
@@ -121,6 +123,7 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
       dut.clock.step(1)
     }
     dut.clock.step()
+    dut.io.data.input_i.valid.poke(0.B)
 
   }
 
@@ -153,11 +156,15 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
       goldenValue: Array[Byte]
   ) = {
 
-    // give input
-    giveInputDataSIMDTop(dut, input)
+    for (i <- 0 until 4) {
 
-    // get output form dut and change to array type then verify with golden data
-    checkSIMDOutputSIMDTop(dut, goldenValue)
+      // give input
+      giveInputDataSIMDTop(dut, input)
+
+      // get output form dut and change to array type then verify with golden data
+      checkSIMDOutputSIMDTop(dut, goldenValue)
+
+    }
 
   }
 
