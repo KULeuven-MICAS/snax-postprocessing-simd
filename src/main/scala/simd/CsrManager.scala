@@ -134,7 +134,7 @@ class SIMDCsrManager(
 // Scala main function for generating CsrManager system verilog file
 object CsrManager extends App {
   emitVerilog(
-    new CsrManager(
+    new SIMDCsrManager(
       SIMDConstant.csrNum,
       SIMDConstant.csrAddrWidth
     ),
