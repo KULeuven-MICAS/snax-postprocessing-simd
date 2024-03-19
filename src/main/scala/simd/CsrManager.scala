@@ -56,7 +56,7 @@ class CsrManagerIO(
   * @param csrAddrWidth
   *   the width of the address
   */
-class CsrManager(
+class SIMDCsrManager(
     csrNum: Int,
     csrAddrWidth: Int
 ) extends Module
@@ -134,7 +134,7 @@ class CsrManager(
 // Scala main function for generating CsrManager system verilog file
 object CsrManager extends App {
   emitVerilog(
-    new CsrManager(
+    new SIMDCsrManager(
       SIMDConstant.csrNum,
       SIMDConstant.csrAddrWidth
     ),
