@@ -56,7 +56,7 @@ class CsrManagerIO(
   * @param csrAddrWidth
   *   the width of the address
   */
-class CsrManager(
+class SIMDCsrManager(
     csrNum: Int,
     csrAddrWidth: Int
 ) extends Module

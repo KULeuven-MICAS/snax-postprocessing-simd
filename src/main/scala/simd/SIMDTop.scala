@@ -14,7 +14,7 @@ class SIMDTop() extends Module with RequireAsyncReset {
   val io = IO(new SIMDTopIO())
 
   val SIMDCsrManager = Module(
-    new CsrManager(SIMDConstant.csrNum, SIMDConstant.csrAddrWidth)
+    new SIMDCsrManager(SIMDConstant.csrNum, SIMDConstant.csrAddrWidth)
   )
   val simd = Module(new SIMD())
 
