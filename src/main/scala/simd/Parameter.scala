@@ -15,8 +15,11 @@ object SIMDConstant {
   // SIMD parallelism
   def laneLen = 64
 
-  // csrManager parameters, we use 3 CSR for Post-processing SIMD configuration, 1 for the vector length, + 1 for status CSR
-  def csrNum: Int = 4 + 1
+  // csrManager parameters, we use 3 CSR for Post-processing SIMD configuration,
+  // CSR 4 for the vector length,
+  // CSR 5 for performance counter
+  // CSR 6 for status CSR (index is 5)
+  def csrNum: Int = 6
   def csrAddrWidth: Int = log2Up(csrNum)
 
 }

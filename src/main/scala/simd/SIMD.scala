@@ -24,6 +24,8 @@ class SIMDIO extends Bundle {
   val ctrl = Flipped(Decoupled(new PECtrl()))
   // decoupled data ports
   val data = new SIMDDataIO()
+  val busy_o = Output(Bool())
+  val performance_counter = Output(UInt(32.W))
 }
 
 // post-processing SIMD module
@@ -85,6 +87,16 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
       }
     }
   }
+
+  io.busy_o := cstate === sBUSY
+
+  val performance_counter = RegInit(0.U(32.W))
+  when(cstate === sBUSY) {
+    performance_counter := performance_counter + 1.U
+  }.elsewhen(config_valid) {
+    performance_counter := 0.U
+  }
+  io.performance_counter := performance_counter
 
   config_valid := io.ctrl.fire
   // when config valid, store the configuration for later computation
