@@ -95,7 +95,7 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
 
     // for start address
     var csr_3 = "x" + String.format("%02X", 4)
-    var csr_4 = "x" + String.format("%02X", 1)
+    var csr_5 = "x" + String.format("%02X", 1)
 
     // set configuration
     write_csr(dut, 0, csr_0)
@@ -104,7 +104,7 @@ trait HasSIMDTopTestUtils extends HasSIMDTestUtils {
     write_csr(dut, 3, csr_3)
 
     // start signal
-    write_csr(dut, 4, csr_4)
+    write_csr(dut, 5, csr_5)
 
     // read csr and check
     assert(csr_0.U(32.W).litValue == read_csr(dut, 0, "x00").litValue)

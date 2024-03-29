@@ -19,7 +19,30 @@ class SIMDTop() extends Module with RequireAsyncReset {
   val simd = Module(new SIMD())
 
   // io.csr and SIMDCsrManager input connection
-  SIMDCsrManager.io.csr_config_in <> io.csr
+  // rsp port connected directly to the outside
+  SIMDCsrManager.io.csr_config_in.rsp <> io.csr.rsp
+
+  val csr_config_in_req_valid = WireInit(false.B)
+  val csr_config_in_req_bits = Wire(new CsrReq(SIMDConstant.csrAddrWidth))
+  val csr_config_in_req_ready = WireInit(false.B)
+
+  val simdBusy2Idle = WireInit(false.B)
+
+  simdBusy2Idle := !simd.io.busy_o && RegNext(simd.io.busy_o)
+  csr_config_in_req_valid := io.csr.req.valid
+  when(simdBusy2Idle) {
+    csr_config_in_req_bits.addr := SIMDConstant.csrNum.U - 2.U
+    csr_config_in_req_bits.data := simd.io.performance_counter
+    csr_config_in_req_bits.write := true.B
+  }.otherwise {
+    csr_config_in_req_bits := io.csr.req.bits
+  }
+
+  SIMDCsrManager.io.csr_config_in.req.valid := csr_config_in_req_valid
+  SIMDCsrManager.io.csr_config_in.req.bits := csr_config_in_req_bits
+  io.csr.req.ready := SIMDCsrManager.io.csr_config_in.req.ready
+
+  SIMDCsrManager.io.SIMDBusy2Idle := simdBusy2Idle
 
   // SIMDCsrManager output and simd control port connection
   // control signals
