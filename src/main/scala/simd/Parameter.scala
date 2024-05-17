@@ -19,7 +19,6 @@ object SIMDConstant {
   // CSR 4 for the vector length,
   // CSR 5 for performance counter
   // CSR 6 for status CSR (index is 5)
-  def csrNum: Int = 6
-  def csrAddrWidth: Int = log2Up(csrNum)
+  def readWriteCsrNum: Int = 5
 
 }

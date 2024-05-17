@@ -21,7 +21,7 @@ class SIMDDataIO extends Bundle {
 // post-processing SIMD input and output declaration
 class SIMDIO extends Bundle {
   // the input data across different PEs shares the same control signal
-  val ctrl = Flipped(Decoupled(new PECtrl()))
+  val ctrl = Flipped(Decoupled(Vec(SIMDConstant.readWriteCsrNum, UInt(32.W))))
   // decoupled data ports
   val data = new SIMDDataIO()
   val busy_o = Output(Bool())
@@ -53,7 +53,7 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
   // the receiver isn't ready, needs to send several cycles
   val keep_output = RegInit(0.B)
 
-  val gemm_output_fire = WireInit(0.B)
+  val simd_output_fire = WireInit(0.B)
 
   val write_counter = RegInit(0.U(32.W))
 
@@ -99,19 +99,33 @@ class SIMD(laneLen: Int = SIMDConstant.laneLen)
   io.performance_counter := performance_counter
 
   config_valid := io.ctrl.fire
-  // when config valid, store the configuration for later computation
-  when(config_valid) {
-    ctrl_csr := io.ctrl.bits
-  }
 
-  gemm_output_fire := io.data.out_o.fire
-  when(gemm_output_fire) {
+  // when config valid, store the configuration for later computation
+  ctrl_csr.input_zp_i := io.ctrl.bits(0)(7, 0).asSInt
+  ctrl_csr.output_zp_i := io.ctrl.bits(0)(15, 8).asSInt
+
+  // this control input port is 32 bits, so it needs 1 csr
+  ctrl_csr.multiplier_i := io.ctrl.bits(2).asSInt
+
+  ctrl_csr.shift_i := io.ctrl.bits(0)(23, 16).asSInt
+  ctrl_csr.max_int_i := io.ctrl.bits(0)(31, 24).asSInt
+
+  ctrl_csr.min_int_i := io.ctrl.bits(1)(7, 0).asSInt
+
+  // this control input port is only 1 bit
+  ctrl_csr.double_round_i := io.ctrl.bits(1)(8).asBool
+
+  // length of the data
+  ctrl_csr.len := io.ctrl.bits(3)
+
+  simd_output_fire := io.data.out_o.fire
+  when(simd_output_fire) {
     write_counter := write_counter + 1.U
   }.elsewhen(cstate === sIDLE) {
     write_counter := 0.U
   }
 
-  computation_finish := (write_counter === ctrl_csr.len - 1.U) && gemm_output_fire && cstate === sBUSY
+  computation_finish := (write_counter === ctrl_csr.len - 1.U) && simd_output_fire && cstate === sBUSY
 
   // always ready for configuration
   io.ctrl.ready := cstate === sIDLE
