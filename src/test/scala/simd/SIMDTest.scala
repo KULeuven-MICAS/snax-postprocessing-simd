@@ -147,20 +147,43 @@ trait HasSIMDTestUtils
       shift: Byte,
       max_int: Byte,
       min_int: Byte,
-      doubleRound: Bool,
+      doubleRound: Boolean,
       goldenValue: Array[Byte]
   ) = {
     dut.clock.step(1)
 
     // giving the configuration
-    dut.io.ctrl.bits.input_zp_i.poke(input_zp)
-    dut.io.ctrl.bits.output_zp_i.poke(output_zp)
-    dut.io.ctrl.bits.multiplier_i.poke(multiplier)
-    dut.io.ctrl.bits.shift_i.poke(shift)
-    dut.io.ctrl.bits.max_int_i.poke(max_int)
-    dut.io.ctrl.bits.min_int_i.poke(min_int)
-    dut.io.ctrl.bits.double_round_i.poke(doubleRound)
-    dut.io.ctrl.bits.len.poke(1.U)
+    // csr 0 content according to csr definition
+    val csr_0 = "x" + String.format("%02X", max_int) + String.format(
+      "%02X",
+      shift
+    ) + String.format("%02X", output_zp) + String.format("%02X", input_zp)
+
+    // csr 1 content according to csr definition
+    var csr_1 = ""
+    if (doubleRound) {
+      csr_1 = "x" + String.format("%02X", 1) + String.format("%02X", min_int)
+    } else {
+      csr_1 = "x" + String.format("%02X", min_int)
+    }
+
+    // csr 2 content according to csr definition
+    var csr_2 = "x" + String.format("%08X", multiplier)
+    var csr_3 = "x" + String.format("%02X", 1)
+
+    // dut.io.ctrl.bits.input_zp_i.poke(input_zp)
+    // dut.io.ctrl.bits.output_zp_i.poke(output_zp)
+    // dut.io.ctrl.bits.multiplier_i.poke(multiplier)
+    // dut.io.ctrl.bits.shift_i.poke(shift)
+    // dut.io.ctrl.bits.max_int_i.poke(max_int)
+    // dut.io.ctrl.bits.min_int_i.poke(min_int)
+    // dut.io.ctrl.bits.double_round_i.poke(doubleRound)
+    // dut.io.ctrl.bits.len.poke(1.U)
+    dut.io.ctrl.bits(0).poke(csr_0.U)
+    dut.io.ctrl.bits(1).poke(csr_1.U)
+    dut.io.ctrl.bits(2).poke(csr_2.U)
+    dut.io.ctrl.bits(3).poke(csr_3.U)
+
     dut.io.ctrl.valid.poke(1.B)
     while (dut.io.ctrl.ready.peekBoolean() == false) {
       dut.clock.step(1)
@@ -231,7 +254,7 @@ class SIMDAutoTest
             shift,
             maxInt,
             minInt,
-            doubleRound.B,
+            doubleRound,
             goldenValue
           )
         }
